@@ -1,238 +1,143 @@
-import React, { useState, useEffect, useRef } from 'react';
-import './App.css';
+import { Button, Input, Typography } from "antd";
+import React, { useEffect, useState } from "react";
+import OTPInput from "react-otp-input";
+import { GameOver, Splash } from "./components";
 
 function App() {
-  const [iteration, setIteration] = useState(0);
-  const [randomArray, setRandomArray] = useState([]);
-  const [message, setMessage] = useState([]);
-
-  const [otp, newOtp] = useState();
-  const [verfied, setVerfied] = useState(false);
-  const [start, setStart] = useState(false);
-  const [otpVal, setOtpVal] = useState([]);
-  const textBase = useRef(null);
-
-  // generate random otp for each first render
+  const [isSplashScreen, setIsSplashScreen] = useState(true);
+  const [guessLength, setGuessLength] = useState(1);
+  const [randomResults, setRandomResults] = useState([]);
+  const [guessValues, setGuessValues] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [chance, setChance] = useState(1);
 
   useEffect(() => {
-    newOtp(Math.floor(1000 + Math.random() * 9000));
+    const timeout = setTimeout(() => {
+      setIsSplashScreen(false);
+      clearTimeout(timeout);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
-  const clearAll = () => {
-    textBase.current.classList.remove("otp-error");
-    textBase.current.childNodes.forEach((child) => {
-      child.value = "";
-    });
-    setOtpVal([]);
-    setVerfied(false);
-  };
-  const clear = () => {
-    textBase.current.classList.remove("otp-error");
-    textBase.current.childNodes.forEach((child) => {
-      child.value = "";
-    });
-    setOtpVal([]);
-  };
-
-  const getOtp = () => {
-    if (parseInt(otpVal.join("")) === otp) {
-      textBase.current.classList.remove("otp-error");
-      setVerfied(true);
-    } else {
-      textBase.current.classList.add("otp-error");
-    }
-  };
-
-  const focusNext = (e) => {
-    const childCount = textBase.current.childElementCount;
-    const currentIndex = [...e.target.parentNode.children].indexOf(e.target);
-    if (currentIndex !== childCount - 1) {
-      e.target.nextSibling.focus();
-    } else {
-      const values = [];
-      textBase.current.childNodes.forEach((child) => {
-        values.push(child.value);
-      });
-      if (values.length !== 0) {
-        setOtpVal(values);
-      }
-      handleGuess(e, values.toString());
-      
-      
-    }
-  };
+  useEffect(() => {
+    setRandomResults(getRandomResults(guessLength));
+  }, [guessLength]);
 
   useEffect(() => {
-    if (otpVal.length === textBase.current.childElementCount) {
-      getOtp();
-    }
-  }, [otpVal]);
+    if (!isSplashScreen && guessValues.length === guessLength) handleGuess();
+  }, [isSplashScreen, guessValues, guessLength]);
 
-  const generateRandomArray = (length) => {
-    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-    let currentIndex = 10;
+  const getRandomResults = (length) => {
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let currentIndex = 9;
     let randomIndex;
 
-    // mengacak elemen array dengan algoritma Fisher-Yates
     while (currentIndex !== 0) {
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex--;
 
-      // menukar nilai elemen array
       [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
     }
     return arr.slice(0, length);
   };
 
-  const handleGuess = (event,guess) => {
-    event.preventDefault();
-    
-    if (guess.toString() === randomArray.toString()) {
-      setMessage([`Congratulation! You Win!`]);
-      setVerfied(true)
-    } else if (iteration === 10) {
-      setMessage([`Game Over! The answer is ${randomArray}`]);
-      setVerfied(true)
-    } else {
-      let rightPosition = 0;
-      let rightValue = 0;
-      for (let i = 0; i < randomArray.length; i++) {
-        console.log('result',randomArray[i].toString())
-        console.log('result',guess[i*2])
-        if (randomArray[i].toString() === guess[i*2]) {
-          rightPosition++;
-        }
+  const handleGuess = () => {
+    if (guessLength > 0) {
+      if (guessValues.toString() === randomResults.toString()) {
+        setMessages([`Congratulation! You Win!`]);
+        setIsGameOver(true);
+      } else if (chance === 10) {
+        setMessages([`Game Over! The answer is ${randomResults}`]);
+        setIsGameOver(true);
+      } else {
+        let rightPosition = 0;
+        let rightValue = 0;
+        for (let i = 0; i < randomResults.length; i++) {
+          if (randomResults[i].toString() === guessValues[i * 2]) {
+            rightPosition++;
+          }
 
-        for (let j = 0; j < guess.length; j++) {
-          if (randomArray[i].toString() === guess[j]) {
-            rightValue++;
+          for (let j = 0; j < guessValues.length; j++) {
+            if (randomResults[i].toString() === guessValues[j]) {
+              rightValue++;
+            }
           }
         }
-      }
 
-      setMessage([...message,`${guess} | Right Position: ${rightPosition}, Right Value: ${rightValue}`]);
-      setIteration(iteration + 1);
-      
-      clear();
-      event.target.previousSibling.previousSibling.focus();
+        setMessages([
+          ...messages,
+          `${guessValues} | Right Position: ${rightPosition}, Right Value: ${rightValue}`,
+        ]);
+        setChance((prevState) => prevState + 1);
+      }
     }
   };
 
-  const handleReset = () => {
-    setRandomArray(generateRandomArray(3));
-    setMessage([]);
-    setIteration(0);
-    clearAll();
-    setStart(true);
+  const handleResetResult = () => {
+    getRandomResults(guessLength);
+    setGuessValues([]);
   };
 
+  const handleChangeGuess = (value) => {
+    setGuessValues(value.split(""));
+  };
+
+  const handleGuessLengthChange = (e) => {
+    setGuessLength(+e.target.value);
+    setGuessValues([]);
+  };
+
+  const handleRestart = () => {
+    getRandomResults(guessLength);
+    setGuessValues([]);
+    setIsGameOver(false);
+  };
+
+  if (isSplashScreen) return <Splash />;
+
+  if (isGameOver) return <GameOver onRestart={handleRestart} />;
+
   return (
-    <>
-      {!start ? (
-        <div className="base">
-        <div className="otp-base" ref={textBase}></div>
-        <button
-          className={`button show`}
-          onClick={() => {handleReset();}}
-        >
-          Start
-        </button>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        height: "100vh",
+        padding: "0 20px",
+      }}
+    >
+      <div style={{ width: 300 }}>
+        <div style={{ marginBottom: 20 }}>
+          <Input value={guessLength} type="number" onChange={handleGuessLengthChange} />
+        </div>
+
+        <OTPInput
+          value={guessValues.join("")}
+          onChange={handleChangeGuess}
+          numInputs={guessLength}
+          containerStyle={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+          inputStyle={{ minWidth: 45 }}
+          renderSeparator={<div style={{ padding: 10 }} />}
+          renderInput={(props) => <Input {...props} />}
+          shouldAutoFocus
+        />
+
+        {messages.length > 0 &&
+          messages.map((message) => <Typography.Text keyboard>{message}</Typography.Text>)}
+
+        <div style={{ marginTop: 20 }}>
+          <Button type="primary" danger onClick={handleResetResult} style={{ width: "100%" }}>
+            Reset
+          </Button>
+        </div>
       </div>
-      )
-      :
-      !verfied ? (
-        <div className="base">
-          <h1>Guess the Number</h1>
-          <p>Guess the 3-digit number in 10 turns or less.</p>
-          <div className="otp-base" ref={textBase}>
-            {new Array(3).fill(null).map((input) => {
-              return <input type="text" maxLength={1} onChange={(e) => focusNext(e)} />;
-            })}
-          </div>
-          
-          {message && message.map((d) => (
-            <p>{d}</p>
-          ))}
-        </div>
-      ) : (
-        <div className="base">
-          <div className="otp-base" ref={textBase}></div>
-          {message && message.map((d) => (
-            <p>{d}</p>
-          ))}
-          <button
-            className={`button ${otpVal.length > 0 && "show"}`}
-            onClick={() => {handleReset();}}
-          >
-            reset
-          </button>
-        </div>
-        
-      )}
-    </>
+    </div>
   );
-  
-
-  // return (
-  //   <>
-  //     {!verfied ? (
-  //       <div className="base">
-  //         {/* <h1> Enter OTP : {otp}</h1>
-  //         <div className="otp-base" ref={textBase}>
-  //           {new Array(4).fill(null).map((input) => {
-  //             return <input type="text" onChange={(e) => focusNext(e)} />;
-  //           })}
-  //         </div>
-  
-  //         <button
-  //           className={`button ${otpVal.length > 0 && "show"}`}
-  //           onClick={() => clearAll()}
-  //         >
-  //           clear otp
-  //         </button> */}
-  //         {/* <div className="container"> */}
-  //         <h1>Guess the Number</h1>
-  //         <p>Guess the 3-digit number in 10 turns or less.</p>
-  //         <form onSubmit={handleGuess}>
-  //           <input
-  //             type="text"
-  //             value={guess}
-  //             onChange={(event) => setGuess(event.target.value)}
-  //             placeholder="Enter your guess"
-  //             maxLength="3"
-  //             pattern="\d{3}"
-  //             required
-  //           />
-  //           <button type="submit">Guess</button>
-  //           <button type="button" onClick={handleReset}>
-  //             Reset
-  //           </button>
-  //         </form>
-  //         {message && message.map(d =>(
-  //           <p>
-  //             {d}
-  //           </p>
-  //         ))
-  //         }
-  //       {/* </div> */}
-  //       </div>
-        
-
-  //     ) : (
-  //       <div className="container">
-  //         {message && message.map(d =>(
-  //           <p>
-  //             {d}
-  //           </p>
-  //         ))
-  //         }
-  //       </div>
-  //     )}
-  //   </>
-  // );
-  
 }
-
-
 
 export default App;
