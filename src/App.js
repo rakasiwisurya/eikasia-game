@@ -5,7 +5,7 @@ import { GameOver, Splash } from "./components";
 
 function App() {
   const [isSplashScreen, setIsSplashScreen] = useState(true);
-  const [guessLength, setGuessLength] = useState(3);
+  const [guessLength, setGuessLength] = useState(0);
   const [randomResults, setRandomResults] = useState([]);
   const [guessValues, setGuessValues] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -70,6 +70,7 @@ function App() {
           ...messages,
           `${guessValues} | Right Position: ${rightPosition}, Right Value: ${rightValue}`,
         ]);
+        setGuessValues([]);
         setChance((prevState) => prevState + 1);
       }
     }
@@ -82,6 +83,10 @@ function App() {
     setMessages([]);
   };
 
+  const handleResetLevel = () => {
+    setGuessLength(0)
+  };
+
   const handleChangeGuess = (value) => {
     setGuessValues(value.split(""));
   };
@@ -91,6 +96,16 @@ function App() {
     setGuessValues([]);
     setChance(1);
     setMessages([]);
+  };
+  const handleLevel = (level) => {
+    console.log('level',level)
+    switch(level){
+      case 'easy': setGuessLength(3);break;
+      case 'medium': setGuessLength(4);break;
+      case 'hard': setGuessLength(5);break;
+      case 'default': setGuessLength(0);break;
+    }
+    
   };
 
   const handleRestart = () => {
@@ -105,6 +120,41 @@ function App() {
 
   if (isGameOver) return <GameOver onRestart={handleRestart} messages={messages} />;
 
+  const SelectLevelScreen = () => {
+    return <>
+      <div style={{ width: 300 }}>
+        <Typography.Title style={{ marginBottom: 20, textAlign: "center" }}>
+          Eikasia
+        </Typography.Title>
+
+        <Typography.Paragraph>
+          Select level.
+        </Typography.Paragraph>
+
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ marginTop: 20 }}>
+            <Button type="primary" onClick={() =>{handleLevel('easy')}} danger style={{ width: "100%" }}>
+              Easy
+            </Button>
+          </div>
+          
+          <div style={{ marginTop: 20 }}>
+            <Button type="primary"  onClick={() =>{handleLevel('medium')}} danger style={{ width: "100%" }}>
+              Medium
+            </Button>
+          </div>
+
+          <div style={{ marginTop: 20 }}>
+            <Button type="primary"  onClick={() =>{handleLevel('hard')}} danger style={{ width: "100%" }}>
+              Hard
+            </Button>
+          </div>
+          {/* <Input value={guessLength} type="number" onChange={handleGuessLengthChange} /> */}
+        </div>
+      </div>
+    </>
+  }
+
   return (
     <div
       style={{
@@ -117,6 +167,7 @@ function App() {
         backgroundColor: "#EEEEEE",
       }}
     >
+      {guessLength == 0 ? (<SelectLevelScreen/>) :
       <div style={{ width: 300 }}>
         <Typography.Title style={{ marginBottom: 20, textAlign: "center" }}>
           Eikasia
@@ -125,10 +176,6 @@ function App() {
         <Typography.Paragraph>
           Guess some of the unique numbers below and then you give 10 chances to guess.
         </Typography.Paragraph>
-
-        <div style={{ marginBottom: 20 }}>
-          <Input value={guessLength} type="number" onChange={handleGuessLengthChange} />
-        </div>
 
         <OTPInput
           value={guessValues.join("")}
@@ -163,7 +210,14 @@ function App() {
             Reset
           </Button>
         </div>
+        
+        <div style={{ marginTop: 20 }}>
+          <Button type="primary" danger onClick={handleResetLevel} style={{ width: "100%" }}>
+            Reset Level
+          </Button>
+        </div>
       </div>
+      }
     </div>
   );
 }
