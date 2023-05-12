@@ -44,6 +44,8 @@ function App() {
   };
 
   const handleGuess = () => {
+    const firstOtpInput = document.getElementById("otp-container").children[0].children[0];
+
     if (guessLength > 0) {
       if (guessValues.toString() === randomResults.toString()) {
         setMessages([`Congratulation! You Win!`]);
@@ -70,6 +72,8 @@ function App() {
           ...messages,
           `${guessValues} | Right Position: ${rightPosition}, Right Value: ${rightValue}`,
         ]);
+        setGuessValues([]);
+        firstOtpInput.focus();
         setChance((prevState) => prevState + 1);
       }
     }
@@ -130,21 +134,24 @@ function App() {
           <Input value={guessLength} type="number" onChange={handleGuessLengthChange} />
         </div>
 
-        <OTPInput
-          value={guessValues.join("")}
-          onChange={handleChangeGuess}
-          numInputs={guessLength}
-          containerStyle={{ display: "flex", justifyContent: "center", alignItems: "center" }}
-          inputStyle={{ minWidth: 45 }}
-          renderSeparator={<div style={{ padding: 10 }} />}
-          renderInput={(props) => <Input {...props} />}
-          shouldAutoFocus
-        />
+        <div id="otp-container">
+          <OTPInput
+            value={guessValues.join("")}
+            onChange={handleChangeGuess}
+            numInputs={guessLength}
+            containerStyle={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+            inputStyle={{ minWidth: 45 }}
+            renderSeparator={<div style={{ padding: 10 }} />}
+            renderInput={(props) => <Input {...props} />}
+            shouldAutoFocus
+          />
+        </div>
 
         <div style={{ marginTop: 20 }}>
           {messages.length > 0 &&
             messages.map((message, index) => (
               <div
+                key={`message-${index}`}
                 style={{
                   display: "flex",
                   justifyContent: "center",
