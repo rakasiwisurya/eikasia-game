@@ -78,6 +78,8 @@ function App() {
   const handleResetResult = () => {
     getRandomResults(guessLength);
     setGuessValues([]);
+    setChance(1);
+    setMessages([]);
   };
 
   const handleChangeGuess = (value) => {
@@ -87,12 +89,16 @@ function App() {
   const handleGuessLengthChange = (e) => {
     setGuessLength(+e.target.value);
     setGuessValues([]);
+    setChance(1);
+    setMessages([]);
   };
 
   const handleRestart = () => {
     getRandomResults(guessLength);
-    setGuessValues([]);
     setIsGameOver(false);
+    setGuessValues([]);
+    setChance(1);
+    setMessages([]);
   };
 
   if (isSplashScreen) return <Splash />;
@@ -108,10 +114,18 @@ function App() {
         alignItems: "center",
         width: "100%",
         height: "100vh",
-        padding: "0 20px",
+        backgroundColor: "#EEEEEE",
       }}
     >
       <div style={{ width: 300 }}>
+        <Typography.Title style={{ marginBottom: 20, textAlign: "center" }}>
+          Eikasia
+        </Typography.Title>
+
+        <Typography.Paragraph>
+          Guess some of the unique numbers below and then you give 10 chances to guess.
+        </Typography.Paragraph>
+
         <div style={{ marginBottom: 20 }}>
           <Input value={guessLength} type="number" onChange={handleGuessLengthChange} />
         </div>
@@ -127,8 +141,22 @@ function App() {
           shouldAutoFocus
         />
 
-        {messages.length > 0 &&
-          messages.map((message) => <Typography.Text keyboard>{message}</Typography.Text>)}
+        <div style={{ marginTop: 20 }}>
+          {messages.length > 0 &&
+            messages.map((message, index) => (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <Typography.Text style={{ fontSize: 13 }} keyboard>
+                  {message}
+                </Typography.Text>
+              </div>
+            ))}
+        </div>
 
         <div style={{ marginTop: 20 }}>
           <Button type="primary" danger onClick={handleResetResult} style={{ width: "100%" }}>

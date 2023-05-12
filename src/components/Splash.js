@@ -11,6 +11,7 @@ const Splash = () => {
         height: "100vh",
         justifyContent: "center",
         alignItems: "center",
+        backgroundColor: "#EEEEEE",
       }}
     >
       <img src={Logo} alt="Logo Splash" width={100} height={100} />

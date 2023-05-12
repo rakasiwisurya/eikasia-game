@@ -12,6 +12,7 @@ const GameOver = (onRestart) => {
         width: "100%",
         height: "100vh",
         padding: "0 20px",
+        backgroundColor: "#EEEEEE",
       }}
     >
       <div style={{ marginBottom: 15 }}>{messages[0]}</div>
