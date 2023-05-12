@@ -11,6 +11,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [isGameOver, setIsGameOver] = useState(false);
   const [chance, setChance] = useState(1);
+  const [maxChance, setMaxChance] = useState(10);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -54,9 +55,11 @@ function App() {
       } else {
         let rightPosition = 0;
         let rightValue = 0;
+        let rightGuess = '';
         for (let i = 0; i < randomResults.length; i++) {
-          if (randomResults[i].toString() === guessValues[i * 2]) {
+          if (randomResults[i].toString() === guessValues[i]) {
             rightPosition++;
+            rightGuess += randomResults[i].toString()+',';
           }
 
           for (let j = 0; j < guessValues.length; j++) {
@@ -66,9 +69,15 @@ function App() {
           }
         }
 
+        let messageInfo = '';
+        switch(guessLength){
+          case 3:messageInfo=`Right Position: ${rightPosition}, Right Value: ${rightValue}, Right Guess: ${rightGuess}`;break;
+          case 4:messageInfo=`Right Position: ${rightPosition}, Right Value: ${rightValue} `;break;
+          case 5:messageInfo=`Right Value: ${rightValue}`;break;
+        }
         setMessages([
           ...messages,
-          `${guessValues} | Right Position: ${rightPosition}, Right Value: ${rightValue}`,
+          `${guessValues} | ${messageInfo}`,
         ]);
         setGuessValues([]);
         setChance((prevState) => prevState + 1);
@@ -100,10 +109,22 @@ function App() {
   const handleLevel = (level) => {
     console.log('level',level)
     switch(level){
-      case 'easy': setGuessLength(3);break;
-      case 'medium': setGuessLength(4);break;
-      case 'hard': setGuessLength(5);break;
-      case 'default': setGuessLength(0);break;
+      case 'easy': 
+        setGuessLength(3);
+        setMaxChance(6)
+        break;
+      case 'medium': 
+        setGuessLength(4);
+        setMaxChance(8);
+        break;
+      case 'hard': 
+        setGuessLength(5);
+        setMaxChance(10)
+        break;
+      case 'default': 
+        setGuessLength(0);
+        setMaxChance(0)
+        break;
     }
     
   };
@@ -174,7 +195,7 @@ function App() {
         </Typography.Title>
 
         <Typography.Paragraph>
-          Guess some of the unique numbers below and then you give 10 chances to guess.
+          Guess some of the unique numbers below and then you give {maxChance} chances to guess.
         </Typography.Paragraph>
 
         <OTPInput
