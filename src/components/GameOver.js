@@ -1,7 +1,7 @@
 import { Button } from "antd";
 import React from "react";
 
-const GameOver = (onRestart) => {
+const GameOver = ({onRestart, messages}) => {
   return (
     <div
       style={{

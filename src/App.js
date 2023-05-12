@@ -5,7 +5,7 @@ import { GameOver, Splash } from "./components";
 
 function App() {
   const [isSplashScreen, setIsSplashScreen] = useState(true);
-  const [guessLength, setGuessLength] = useState(1);
+  const [guessLength, setGuessLength] = useState(3);
   const [randomResults, setRandomResults] = useState([]);
   const [guessValues, setGuessValues] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -90,14 +90,16 @@ function App() {
   };
 
   const handleRestart = () => {
-    getRandomResults(guessLength);
+    setRandomResults(getRandomResults(guessLength));
     setGuessValues([]);
+    setMessages([])
+    setChance(1)
     setIsGameOver(false);
   };
 
   if (isSplashScreen) return <Splash />;
 
-  if (isGameOver) return <GameOver onRestart={handleRestart} />;
+  if (isGameOver) return <GameOver onRestart={handleRestart} messages={messages} />;
 
   return (
     <div
